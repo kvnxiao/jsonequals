@@ -5,10 +5,12 @@ package com.github.alphahelix00.jsonequals;
  */
 public class Constants {
 
-    public static final char CH_BEGIN_CURLY = '{';
-    public static final char CH_BEGIN_BRACKET = '[';
-    public static final char CH_WILDCARD = '*';
-    public static final char CH_NODE_SEPARATOR = '.';
-    public static final String CH_ROOT = "$";
+    public static final String BEGIN_CURLY = "{";
+    public static final String BEGIN_BRACKET = "[";
+    public static final String END_BRACKET = "]";
+    public static final String WILDCARD = "*";
+    public static final String NODE_SEPARATOR = ".";
+    public static final String SEPARATOR_REGEX = "\\.";
+    public static final String ROOT_NAME = "$";
 
 }

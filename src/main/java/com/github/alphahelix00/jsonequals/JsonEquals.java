@@ -7,12 +7,12 @@ import me.doubledutch.lazyjson.LazyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static com.github.alphahelix00.jsonequals.Constants.CH_NODE_SEPARATOR;
-import static com.github.alphahelix00.jsonequals.Constants.CH_ROOT;
+import static com.github.alphahelix00.jsonequals.Constants.*;
 
 /**
  * Created by zxiao on 2/15/17.
@@ -20,19 +20,71 @@ import static com.github.alphahelix00.jsonequals.Constants.CH_ROOT;
 public class JsonEquals {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonEquals.class);
+    private static boolean debugMode = false;
 
-    public static boolean compareNode(LazyObject a, LazyObject b) {
-        compareNode(a, b, CH_ROOT);
+    private final LazyType rootType;
+    private LazyElement source = null;
+    private LazyElement comparate = null;
+    private List<String> pruneFields;
+    private List<String> ignoreFields;
+    private List<String> successMessages;
+    private List<String> inequalityMessages;
+
+    private JsonEquals(LazyType rootType) {
+        this.rootType = rootType;
+        this.successMessages = new ArrayList<>();
+        this.inequalityMessages = new ArrayList<>();
+    }
+
+    public static JsonEquals ofType(LazyType rootType) {
+        return new JsonEquals(rootType);
+    }
+
+    public JsonEquals withSource(LazyElement source) {
+        this.source = source;
+        return this;
+    }
+
+    public JsonEquals withComparate(LazyElement comparate) {
+        this.comparate = comparate;
+        return this;
+    }
+
+    public JsonEquals withIgnoreFields(List<String> ignoreFields) {
+        this.ignoreFields = ignoreFields;
+        return this;
+    }
+
+    public JsonEquals withPruneFields(List<String> pruneFields) {
+        this.pruneFields = pruneFields;
+        return this;
+    }
+
+    public JsonCompareResult compare() {
+        if (rootType == LazyType.OBJECT) {
+            compareNode((LazyObject) source, (LazyObject) comparate);
+        } else {
+            compareNode((LazyArray) source, (LazyArray) comparate);
+        }
+        return JsonCompareResult.of(inequalityMessages.isEmpty(), successMessages, inequalityMessages);
+    }
+
+    public boolean compareNode(LazyObject a, LazyObject b) {
+        compareNode(a, b, ROOT_NAME);
         return false;
     }
 
-    public static boolean compareNode(LazyArray a, LazyArray b) {
-        compareNode(a, b, CH_ROOT);
+    public boolean compareNode(LazyArray a, LazyArray b) {
+        compareNode(a, b, ROOT_NAME);
         return false;
     }
 
     // Compare objects
-    public static void compareNode(LazyObject a, LazyObject b, String currentPath) {
+    public void compareNode(LazyObject a, LazyObject b, String currentPath) {
+        if (pathIsIgnoreField(currentPath)) {
+            return;
+        }
+
         Set<String> fieldsA = a.keySet();
         Set<String> fieldsB = b.keySet();
         // TODO: filter fields set for ignoreValues
@@ -47,22 +99,26 @@ public class JsonEquals {
                 }
             }
         } else {
-            LOGGER.warn("a and b JSON objects do not have the same child key names.");
+            inequalityMessages.add("JSON objects do not have the same child key names! " + fieldsA + " vs. " + fieldsB);
         }
     }
 
     // Compare arrays
-    public static void compareNode(LazyArray a, LazyArray b, String currentPath) {
-        List<LazyElement> elementsA = getChildList(a);
-        List<LazyElement> elementsB = getChildList(b);
-        if (!elementsA.isEmpty() && !elementsB.isEmpty()) {
+    public void compareNode(LazyArray a, LazyArray b, String currentPath) {
+        if (pathIsIgnoreField(currentPath)) {
+            return;
+        }
+
+        List<LazyElement> childrenA = getChildList(a);
+        List<LazyElement> childrenB = getChildList(b);
+        if (!childrenA.isEmpty() && !childrenB.isEmpty()) {
             // TODO: prune and filter list of children for ignores
-            if (elementsA.size() == elementsB.size()) {
-                for (int i = 0; i < elementsA.size(); i++) {
-                    if (elementsA.get(i) instanceof LazyObject) {
-                        compareNode((LazyObject) elementsA.get(i), (LazyObject) elementsB.get(i), currentPath + "[" + i + "]");
-                    } else if (elementsA.get(i) instanceof LazyArray) {
-                        compareNode((LazyArray) elementsA.get(i), (LazyArray) elementsB.get(i), currentPath + "[" + i + "]");
+            if (childrenA.size() == childrenB.size()) {
+                for (int i = 0; i < childrenA.size(); i++) {
+                    if (childrenA.get(i) instanceof LazyObject) {
+                        compareNode((LazyObject) childrenA.get(i), (LazyObject) childrenB.get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+                    } else if (childrenA.get(i) instanceof LazyArray) {
+                        compareNode((LazyArray) childrenA.get(i), (LazyArray) childrenB.get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
                     }
                 }
             } else {
@@ -71,40 +127,82 @@ public class JsonEquals {
         }
     }
 
-    public static void compareValues(LazyObject a, LazyObject b, String fieldName, String currentPath) {
+    public void compareValues(LazyObject a, LazyObject b, String fieldName, String currentPath) {
+        if (debugMode) {
+            LOGGER.debug("Checking leaf: {}", currentPath);
+        }
         if (a.getType(fieldName) == LazyType.STRING && b.getType(fieldName) == LazyType.STRING) {
             if (a.getString(fieldName).equals(b.getString(fieldName))) {
-                currentPath += "==" + a.getString(fieldName);
+                successMessages.add(currentPath + "==" + a.getString(fieldName));
             } else {
                 logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
             }
         } else if (a.getType(fieldName) == LazyType.INTEGER && b.getType(fieldName) == LazyType.INTEGER) {
             if (a.getInt(fieldName) == b.getInt(fieldName)) {
-                currentPath += "==" + a.getString(fieldName);
+                successMessages.add(currentPath + "==" + a.getString(fieldName));
             } else {
                 logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
             }
         } else if (a.getType(fieldName) == LazyType.BOOLEAN && b.getType(fieldName) == LazyType.BOOLEAN) {
             if (a.getBoolean(fieldName) == b.getBoolean(fieldName)) {
-                currentPath += "==" + a.getString(fieldName);
+                successMessages.add(currentPath + "==" + a.getString(fieldName));
             } else {
                 logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
             }
         } else if (a.getType(fieldName) == LazyType.FLOAT && b.getType(fieldName) == LazyType.FLOAT) {
             if (a.getString(fieldName).equals(b.getString(fieldName))) {
-                currentPath += "==" + a.getString(fieldName);
+                successMessages.add(currentPath + "==" + a.getString(fieldName));
             } else {
                 logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
             }
         } else if (a.getType(fieldName) == LazyType.NULL && b.getType(fieldName) == LazyType.NULL) {
-            currentPath += "==" + a.getString(fieldName);
+            successMessages.add(currentPath + "==" + a.getString(fieldName));
         } else {
-            LOGGER.warn("{} values were not of the same type! Expected {} but got {}", currentPath, a.getType(fieldName), b.getType(fieldName));
+            inequalityMessages.add(currentPath + " were not of the same type! Expected type " + a.getType(fieldName) + " but got type " + b.getType(fieldName));
         }
-        System.out.println(currentPath);
     }
 
-    private static List<LazyElement> getChildList(LazyArray parent) {
+    private boolean pathIsIgnoreField(String currentPath) {
+        if (ignoreFields != null && !ignoreFields.isEmpty()) {
+            for (String ignoreField : ignoreFields) {
+                if (pathEquals(currentPath, ignoreField)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean pathEquals(String path, String patternedPath) {
+        String[] pathArr = path.split(SEPARATOR_REGEX);
+        String[] ignorePathArr = patternedPath.split(SEPARATOR_REGEX);
+
+        if (pathArr.length != ignorePathArr.length) {
+            return false;
+        }
+
+        for (int i = 0; i < pathArr.length; i++) {
+            String nodePath = pathArr[i];
+            String ignoreNodeArr = ignorePathArr[i];
+            boolean nodeIsArray = nodePath.endsWith(END_BRACKET);
+            boolean ignoreNodeIsArray = ignoreNodeArr.endsWith(END_BRACKET);
+            if (nodeIsArray && ignoreNodeIsArray) {
+                String pathIndex = pathArr[i].substring(pathArr[i].lastIndexOf(BEGIN_BRACKET) + 1, pathArr[i].length() - 1);
+                String ignoreIndex = ignorePathArr[i].substring(ignorePathArr[i].lastIndexOf(BEGIN_BRACKET) + 1, ignorePathArr[i].length() - 1);
+                if (!pathIndex.equals(ignoreIndex) && !ignoreIndex.equals(WILDCARD)) {
+                    return false;
+                }
+                nodePath = nodePath.substring(0, nodePath.length() - pathIndex.length() - 2);
+                ignoreNodeArr = ignoreNodeArr.substring(0, ignoreNodeArr.length() - ignoreIndex.length() - 2);
+            }
+            if (!nodePath.equals(ignoreNodeArr)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private List<LazyElement> getChildList(LazyArray parent) {
         List<LazyElement> children = new LinkedList<>();
         for (int i = 0; i < parent.length(); i++) {
             if (childIsObject(parent, i)) {
@@ -112,18 +210,18 @@ public class JsonEquals {
             } else if (childIsArray(parent, i)) {
                 children.add(parent.getJSONArray(i));
             } else {
-                LOGGER.error("Element inside array is neither a JSON object or JSON array!");
+                LOGGER.warn("Cannot compare primitive element inside array as it is neither a JSON object or JSON array!");
             }
         }
         return children;
     }
 
-    private static void logInequality(String valueA, String valueB, String currentPath) {
-        LOGGER.warn("{} values were not the same! Expected {} but got {}", currentPath, valueA, valueB);
+    private void logInequality(String valueA, String valueB, String currentPath) {
+        inequalityMessages.add(currentPath + " values were not the same! Expected " + valueA + " but got " + valueB);
     }
 
     private static String getChildPath(String currentPath, String childName) {
-        return currentPath + CH_NODE_SEPARATOR + childName;
+        return currentPath + NODE_SEPARATOR + childName;
     }
 
     private static boolean childIsObject(LazyObject parent, String fieldName) {
@@ -142,4 +240,7 @@ public class JsonEquals {
         return parent.getType(index) == LazyType.ARRAY;
     }
 
+    public static void setDebugMode(boolean debugMode) {
+        JsonEquals.debugMode = debugMode;
+    }
 }

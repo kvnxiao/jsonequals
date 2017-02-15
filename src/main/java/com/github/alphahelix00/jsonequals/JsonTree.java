@@ -5,8 +5,10 @@ import me.doubledutch.lazyjson.LazyElement;
 import me.doubledutch.lazyjson.LazyObject;
 import me.doubledutch.lazyjson.LazyType;
 
-import static com.github.alphahelix00.jsonequals.Constants.CH_BEGIN_BRACKET;
-import static com.github.alphahelix00.jsonequals.Constants.CH_BEGIN_CURLY;
+import java.util.List;
+
+import static com.github.alphahelix00.jsonequals.Constants.BEGIN_BRACKET;
+import static com.github.alphahelix00.jsonequals.Constants.BEGIN_CURLY;
 
 /**
  * Created by zxiao on 2/15/17.
@@ -32,10 +34,10 @@ public class JsonTree {
     }
 
     private JsonTree(String raw) {
-        if (raw.charAt(0) == CH_BEGIN_CURLY) {
+        if (raw.startsWith(BEGIN_CURLY)) {
             this.rootType = LazyType.OBJECT;
             this.root = new LazyObject(raw);
-        } else if (raw.charAt(0) == CH_BEGIN_BRACKET) {
+        } else if (raw.startsWith(BEGIN_BRACKET)) {
             this.rootType = LazyType.ARRAY;
             this.root = new LazyArray(raw);
         } else {
@@ -57,17 +59,29 @@ public class JsonTree {
     // Comparator Methods
     // ------------------
 
-    public boolean compareTo(JsonTree other) {
+    public JsonCompareResult compareTo(JsonTree other, List<String> ignoreFields, List<String> pruneFields) {
         if (other != null) {
             if (this.isRootObject() && other.isRootObject()) {
                 // JSON object node
-                JsonEquals.compareNode((LazyObject) this.getRoot(), (LazyObject) other.getRoot());
+                return JsonEquals.ofType(LazyType.OBJECT).withSource(this.getRoot()).withComparate(other.getRoot()).withIgnoreFields(ignoreFields).withPruneFields(pruneFields).compare();
             } else if (this.isRootArray() && other.isRootArray()) {
                 // JSON array node
-                JsonEquals.compareNode((LazyArray) this.getRoot(), (LazyArray) other.getRoot());
+                return JsonEquals.ofType(LazyType.ARRAY).withSource(this.getRoot()).withComparate(other.getRoot()).withIgnoreFields(ignoreFields).withPruneFields(pruneFields).compare();
             }
         }
-        return false;
+        return null;
+    }
+
+    public JsonCompareResult compareTo(JsonTree other) {
+        return compareTo(other, null, null);
+    }
+
+    public JsonCompareResult compareToWithIgnore(JsonTree other, List<String> ignoreFields) {
+        return compareTo(other, ignoreFields, null);
+    }
+
+    public JsonCompareResult compareToWithPrune(JsonTree other, List<String> pruneFields) {
+        return compareTo(other, null, pruneFields);
     }
 
     // -----------------
