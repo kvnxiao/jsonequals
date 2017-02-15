@@ -1,4 +1,4 @@
-group 'com.github.alphahelix00.jsonequals'
+group 'com.github.alphahelix00'
 version '1.0-SNAPSHOT'
 
 task wrapper(type: Wrapper) {
