@@ -109,16 +109,16 @@ public class JsonEquals {
             return;
         }
 
-        List<LazyElement> childrenA = getChildList(a);
-        List<LazyElement> childrenB = getChildList(b);
+        JsonChildren childrenA = getChildList(a);
+        JsonChildren childrenB = getChildList(b);
         if (!childrenA.isEmpty() && !childrenB.isEmpty()) {
             // TODO: prune and filter list of children for ignores
-            if (childrenA.size() == childrenB.size()) {
-                for (int i = 0; i < childrenA.size(); i++) {
-                    if (childrenA.get(i) instanceof LazyObject) {
-                        compareNode((LazyObject) childrenA.get(i), (LazyObject) childrenB.get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
-                    } else if (childrenA.get(i) instanceof LazyArray) {
-                        compareNode((LazyArray) childrenA.get(i), (LazyArray) childrenB.get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+            if (childrenA.nodeCount() == childrenB.nodeCount() && childrenA.primitiveCount() == childrenB.primitiveCount()) {
+                for (int i = 0; i < childrenA.nodeCount(); i++) {
+                    if (childrenA.getChildNodes().get(i) instanceof LazyObject) {
+                        compareNode((LazyObject) childrenA.getChildNodes().get(i), (LazyObject) childrenB.getChildNodes().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+                    } else if (childrenA.getChildNodes().get(i) instanceof LazyArray) {
+                        compareNode((LazyArray) childrenA.getChildNodes().get(i), (LazyArray) childrenB.getChildNodes().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
                     }
                 }
             } else {
@@ -202,18 +202,20 @@ public class JsonEquals {
         return true;
     }
 
-    private List<LazyElement> getChildList(LazyArray parent) {
-        List<LazyElement> children = new LinkedList<>();
+    private JsonChildren getChildList(LazyArray parent) {
+        List<LazyElement> childNodes = new LinkedList<>();
+        List<Object> childPrimitives = new LinkedList<>();
         for (int i = 0; i < parent.length(); i++) {
             if (childIsObject(parent, i)) {
-                children.add(parent.getJSONObject(i));
+                childNodes.add(parent.getJSONObject(i));
             } else if (childIsArray(parent, i)) {
-                children.add(parent.getJSONArray(i));
+                childNodes.add(parent.getJSONArray(i));
             } else {
-                LOGGER.warn("Cannot compare primitive element inside array as it is neither a JSON object or JSON array!");
+                childPrimitives.add(parent.getString(i));
+//                LOGGER.warn("Cannot compare primitive element inside array as it is neither a JSON object or JSON array!");
             }
         }
-        return children;
+        return JsonChildren.of(childNodes, childPrimitives);
     }
 
     private void logInequality(String valueA, String valueB, String currentPath) {
