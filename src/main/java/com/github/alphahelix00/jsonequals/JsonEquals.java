@@ -11,6 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.alphahelix00.jsonequals.Constants.CH_NODE_SEPARATOR;
+import static com.github.alphahelix00.jsonequals.Constants.CH_ROOT;
+
 /**
  * Created by zxiao on 2/15/17.
  */
@@ -19,18 +22,17 @@ public class JsonEquals {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonEquals.class);
 
     public static boolean compareNode(LazyObject a, LazyObject b) {
-        compareNode(a, b, "$");
+        compareNode(a, b, CH_ROOT);
         return false;
     }
 
     public static boolean compareNode(LazyArray a, LazyArray b) {
-        compareNode(a, b, "$");
+        compareNode(a, b, CH_ROOT);
         return false;
     }
 
     // Compare objects
     public static void compareNode(LazyObject a, LazyObject b, String currentPath) {
-        System.out.println(currentPath);
         Set<String> fieldsA = a.keySet();
         Set<String> fieldsB = b.keySet();
         // TODO: filter fields set for ignoreValues
@@ -51,7 +53,6 @@ public class JsonEquals {
 
     // Compare arrays
     public static void compareNode(LazyArray a, LazyArray b, String currentPath) {
-        System.out.println(currentPath);
         List<LazyElement> elementsA = getChildList(a);
         List<LazyElement> elementsB = getChildList(b);
         if (!elementsA.isEmpty() && !elementsB.isEmpty()) {
@@ -59,9 +60,9 @@ public class JsonEquals {
             if (elementsA.size() == elementsB.size()) {
                 for (int i = 0; i < elementsA.size(); i++) {
                     if (elementsA.get(i) instanceof LazyObject) {
-                        compareNode((LazyObject) elementsA.get(i), (LazyObject) elementsB.get(i), currentPath + "[" + i  + "]");
-                    } else if (elementsA.get(i) instanceof  LazyArray) {
-                        compareNode((LazyArray) elementsA.get(i), (LazyArray) elementsB.get(i), currentPath + "[" + i  + "]");
+                        compareNode((LazyObject) elementsA.get(i), (LazyObject) elementsB.get(i), currentPath + "[" + i + "]");
+                    } else if (elementsA.get(i) instanceof LazyArray) {
+                        compareNode((LazyArray) elementsA.get(i), (LazyArray) elementsB.get(i), currentPath + "[" + i + "]");
                     }
                 }
             } else {
@@ -71,20 +72,36 @@ public class JsonEquals {
     }
 
     public static void compareValues(LazyObject a, LazyObject b, String fieldName, String currentPath) {
-        System.out.println(currentPath);
         if (a.getType(fieldName) == LazyType.STRING && b.getType(fieldName) == LazyType.STRING) {
-
+            if (a.getString(fieldName).equals(b.getString(fieldName))) {
+                currentPath += "==" + a.getString(fieldName);
+            } else {
+                logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
+            }
         } else if (a.getType(fieldName) == LazyType.INTEGER && b.getType(fieldName) == LazyType.INTEGER) {
-
+            if (a.getInt(fieldName) == b.getInt(fieldName)) {
+                currentPath += "==" + a.getString(fieldName);
+            } else {
+                logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
+            }
         } else if (a.getType(fieldName) == LazyType.BOOLEAN && b.getType(fieldName) == LazyType.BOOLEAN) {
-
+            if (a.getBoolean(fieldName) == b.getBoolean(fieldName)) {
+                currentPath += "==" + a.getString(fieldName);
+            } else {
+                logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
+            }
         } else if (a.getType(fieldName) == LazyType.FLOAT && b.getType(fieldName) == LazyType.FLOAT) {
-
+            if (a.getString(fieldName).equals(b.getString(fieldName))) {
+                currentPath += "==" + a.getString(fieldName);
+            } else {
+                logInequality(a.getString(fieldName), b.getString(fieldName), currentPath);
+            }
         } else if (a.getType(fieldName) == LazyType.NULL && b.getType(fieldName) == LazyType.NULL) {
-
+            currentPath += "==" + a.getString(fieldName);
         } else {
-            LOGGER.warn("{} are not of the same type!", currentPath + "." + fieldName);
+            LOGGER.warn("{} values were not of the same type! Expected {} but got {}", currentPath, a.getType(fieldName), b.getType(fieldName));
         }
+        System.out.println(currentPath);
     }
 
     private static List<LazyElement> getChildList(LazyArray parent) {
@@ -101,8 +118,12 @@ public class JsonEquals {
         return children;
     }
 
+    private static void logInequality(String valueA, String valueB, String currentPath) {
+        LOGGER.warn("{} values were not the same! Expected {} but got {}", currentPath, valueA, valueB);
+    }
+
     private static String getChildPath(String currentPath, String childName) {
-        return currentPath + "." + childName;
+        return currentPath + CH_NODE_SEPARATOR + childName;
     }
 
     private static boolean childIsObject(LazyObject parent, String fieldName) {

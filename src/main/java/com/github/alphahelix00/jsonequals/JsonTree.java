@@ -53,9 +53,9 @@ public class JsonTree {
         return new JsonTree(raw);
     }
 
-    //
-    //
-    //
+    // ------------------
+    // Comparator Methods
+    // ------------------
 
     public boolean compareTo(JsonTree other) {
         if (other != null) {

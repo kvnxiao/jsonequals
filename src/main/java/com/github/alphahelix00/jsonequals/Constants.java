@@ -7,7 +7,8 @@ public class Constants {
 
     public static final char CH_BEGIN_CURLY = '{';
     public static final char CH_BEGIN_BRACKET = '[';
-    public static final char CH_ROOT = '$';
     public static final char CH_WILDCARD = '*';
+    public static final char CH_NODE_SEPARATOR = '.';
+    public static final String CH_ROOT = "$";
 
 }
