@@ -1,7 +1,7 @@
 # JsonEquals
 
 JsonEquals is a simple JSON deep-equality comparator for Java.
-It ignores the ordering of elements inside the JSON during comparison, and is perfect for comparing JSON responses between production and staging environments when your project is due for an API upgrade.
+It ignores the ordering of JSON keys during comparison, and is perfect for comparing JSON responses between production and staging environments when your project is due for an API upgrade.
 
 ## Usage
 
@@ -19,10 +19,41 @@ For example, responses with different timestamps can be ignored (ignore list), a
 #### Ignore Fields
 
 Supply a `List<String>` of strings in a dot-notated JSON path format to have JsonEquals ignore these nodes during comparison. Use `JsonRoot#compareToWithIgnore()`
+```java
+List<String> ignoreList = new ArrayList<>();
+
+ignoreList.add(... see below comment block);
+/*
+ignoreList.add("$");    // Ignores root element and all sub-children
+ignoreList.add("$[1]"); // If root element is an array, ignore the second object in the array including all its sub-children
+
+ignoreList.add("$.data.timestamp");
+// Ignores the root -> data -> timestamp values during comparison, e.g. the two JSONs below will be equal
+{
+    "data": {
+        "name": "John Smith"
+        "timestamp": 12345
+    }
+}
+
+    versus
+    
+{
+    "data": {
+        "name": "John Smith"
+        "timestamp": 23456
+    }
+}
+*/
+
+JsonCompareResult result = jsonRootA.compareToWithIgnore(jsonRootB, ignoreList);
+```
 
 #### Pruning Objects Inside Arrays
 
-Supply a `Map<String, String>` of strings in a dot-notated JSON path format, with the expected output value, to be _**filtered out**_ and ignored during comparison. Use `JsonRoot#compareToWithPrune()`
+Supply a `Map<String, String>` of strings in a dot-notated JSON path format, with the expected output value. Any matches will be _**filtered out (read: removed)**_ and therefore ignored during comparison. Note that this _will_ shift the array indices. Use `JsonRoot#compareToWithPrune()`
+
+Example: see [`IgnoreAndPruneTest.java`](https://github.com/alphahelix00/jsonequals/blob/master/src/test/java/IgnoreAndPruneTest.java), along with [`ignore_prune_a.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_a.json) and [`ignore_prune_b.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_b.json)
 
 #### Debug Mode
 
