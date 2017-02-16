@@ -1,0 +1,48 @@
+[
+  {
+    "status_code": 0,
+    "error_data": null,
+    "data": {
+      "currency": "CAD",
+      "email": "someemail@email.com",
+      "first_name": "John",
+      "gender": "male",
+      "identities": [
+        {
+          "appName": "app1",
+          "installed": true,
+          "appId": "0001"
+        },
+        {
+          "appName": "app2",
+          "installed": true,
+          "appId": "0002"
+        },
+        {
+          "appName": "app3",
+          "installed": false,
+          "appId": "0003"
+        },
+        {
+          "appName": "app4",
+          "installed": true,
+          "appId": "0004"
+        },
+        {
+          "appName": "app5",
+          "installed": true,
+          "appId": "0005"
+        },
+        {
+          "appName": "app6",
+          "installed": true,
+          "appId": "0006"
+        }
+      ],
+      "last_name": "Doe",
+      "last_updated": 1486584184,
+      "locale": "en_US",
+      "picture": "link.url"
+    }
+  }
+]
