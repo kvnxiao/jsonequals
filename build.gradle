@@ -17,6 +17,6 @@ repositories {
 dependencies {
     compile 'ch.qos.logback:logback-classic:1.2.1'
     compile 'org.slf4j:slf4j-api:1.7.22'
-    compile 'me.doubledutch:lazyjson:1.2.6'
+    compile 'me.doubledutch:lazyjson:1.2.7'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
