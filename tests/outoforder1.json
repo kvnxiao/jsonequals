@@ -10,5 +10,6 @@
   "c",
   true,
   false,
-  4.2
+  4.2,
+  null
 ]
