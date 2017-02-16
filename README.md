@@ -19,6 +19,7 @@ For example, responses with different timestamps can be ignored (ignore list), a
 #### Ignore Fields
 
 Supply a `List<String>` of strings in a dot-notated JSON path format to have JsonEquals ignore these nodes during comparison. Use `JsonRoot#compareToWithIgnore()`
+
 ```java
 List<String> ignoreList = new ArrayList<>();
 
@@ -26,7 +27,7 @@ ignoreList.add(... see below comment block);
 /*
 ignoreList.add("$");    // Ignores root element and all sub-children
 ignoreList.add("$[1]"); // If root element is an array, ignore the second object in the array including all its sub-children
-
+ignoreList.add("$[*]"); // Use * as a wildcard to specify all elements in an array
 ignoreList.add("$.data.timestamp");
 // Ignores the root -> data -> timestamp values during comparison, e.g. the two JSONs below will be equal
 {
