@@ -14,7 +14,7 @@ The `JsonRoot#compareTo` method returns a JsonCompareResult, which holds informa
 ## Settings
 
 JsonEquals is capable of *ignoring* fields and *pruning* JSON objects within JSON arrays before comparison.
-For example, responses with different timestamps can be ignored.
+For example, responses with different timestamps can be ignored (ignore list), and array objects containing JSON objects with certain field values can be ignored (pruned list with expected value to be filtered out).
 
 #### Ignore Fields
 
