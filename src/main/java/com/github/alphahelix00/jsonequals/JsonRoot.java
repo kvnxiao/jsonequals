@@ -14,7 +14,7 @@ import static com.github.alphahelix00.jsonequals.Constants.BEGIN_CURLY;
 /**
  * Created by zxiao on 2/15/17.
  */
-public class JsonTree {
+public class JsonRoot {
 
     private final LazyElement root;
     private final LazyType rootType;
@@ -23,7 +23,7 @@ public class JsonTree {
     // Constructors
     // ------------
 
-    private JsonTree(LazyElement root) {
+    private JsonRoot(LazyElement root) {
         this.root = root;
         if (root instanceof LazyObject) {
             this.rootType = LazyType.OBJECT;
@@ -34,7 +34,7 @@ public class JsonTree {
         }
     }
 
-    private JsonTree(String raw) {
+    private JsonRoot(String raw) {
         if (raw.startsWith(BEGIN_CURLY)) {
             this.rootType = LazyType.OBJECT;
             this.root = new LazyObject(raw);
@@ -48,19 +48,19 @@ public class JsonTree {
         }
     }
 
-    public static JsonTree from(LazyElement root) {
-        return new JsonTree(root);
+    public static JsonRoot from(LazyElement root) {
+        return new JsonRoot(root);
     }
 
-    public static JsonTree from(String raw) {
-        return new JsonTree(raw);
+    public static JsonRoot from(String raw) {
+        return new JsonRoot(raw);
     }
 
     // ------------------
     // Comparator Methods
     // ------------------
 
-    public JsonCompareResult compareTo(JsonTree other, List<String> ignoreFields, Map<String, String> pruneFields) {
+    public JsonCompareResult compareTo(JsonRoot other, List<String> ignoreFields, Map<String, String> pruneFields) {
         if (other != null) {
             if (this.isRootObject() && other.isRootObject()) {
                 // JSON object node
@@ -73,15 +73,15 @@ public class JsonTree {
         return null;
     }
 
-    public JsonCompareResult compareTo(JsonTree other) {
+    public JsonCompareResult compareTo(JsonRoot other) {
         return compareTo(other, null, null);
     }
 
-    public JsonCompareResult compareToWithIgnore(JsonTree other, List<String> ignoreFields) {
+    public JsonCompareResult compareToWithIgnore(JsonRoot other, List<String> ignoreFields) {
         return compareTo(other, ignoreFields, null);
     }
 
-    public JsonCompareResult compareToWithPrune(JsonTree other, Map<String, String> pruneFields) {
+    public JsonCompareResult compareToWithPrune(JsonRoot other, Map<String, String> pruneFields) {
         return compareTo(other, null, pruneFields);
     }
 
