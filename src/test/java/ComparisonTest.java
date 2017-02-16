@@ -56,6 +56,7 @@ public class ComparisonTest {
         JsonTree rootTreeA = JsonTree.from(multiArrayTest1);
         JsonTree rootTreeB = JsonTree.from(multiArrayTest2);
         JsonCompareResult result = rootTreeA.compareTo(rootTreeB);
+        result.getSuccessMessages().forEach(System.out::println);
         result.getInequalityMessages().forEach(System.out::println);
         assertTrue(result.isEqual());
     }

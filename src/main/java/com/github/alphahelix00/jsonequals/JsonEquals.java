@@ -120,8 +120,13 @@ public class JsonEquals {
                     compareNode(childrenA.getChildArrays().get(i), childrenB.getChildArrays().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
                 }
                 for (int i = 0; i < childrenA.primitiveCount(); i++) {
+                    if (debugMode) {
+                        LOGGER.debug("Checking array primitive value inside {}", currentPath);
+                    }
                     if (!childrenA.getChildPrimitives().get(i).equals(childrenB.getChildPrimitives().get(i))) {
                         inequalityMessages.add(currentPath + " JSON array value expected to be " + childrenA.getChildPrimitives().get(i) + " but got " + childrenB.getChildPrimitives().get(i));
+                    } else {
+                        successMessages.add(currentPath + "[_] contains: " + childrenA.getChildPrimitives().get(i));
                     }
                 }
             } else {
@@ -136,7 +141,7 @@ public class JsonEquals {
         }
 
         if (debugMode) {
-            LOGGER.debug("Checking leaf: {}", currentPath);
+            LOGGER.debug("Checking leaf object: {}", currentPath);
         }
 
         if (a.getType(fieldName) == LazyType.STRING && b.getType(fieldName) == LazyType.STRING) {
