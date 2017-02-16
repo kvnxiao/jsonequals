@@ -146,7 +146,7 @@ public class JsonEquals {
                     }
                 }
             } else {
-                inequalityMessages.add(currentPath + " JSON array not equal in length!");
+                inequalityMessages.add(currentPath + " JSON array not equal in length! " + childrenA.size() + " vs " + childrenB.size());
             }
         }
     }
