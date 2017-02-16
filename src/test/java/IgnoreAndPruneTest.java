@@ -1,4 +1,5 @@
 import com.github.alphahelix00.jsonequals.JsonCompareResult;
+import com.github.alphahelix00.jsonequals.JsonEquals;
 import com.github.alphahelix00.jsonequals.JsonRoot;
 import org.junit.Test;
 
@@ -22,6 +23,7 @@ public class IgnoreAndPruneTest {
     @Test
     public void test() {
         try {
+            JsonEquals.setDebugMode(true);
             String rawA = new String(Files.readAllBytes(Paths.get(GCT_A)));
             String rawB = new String(Files.readAllBytes(Paths.get(GCT_B)));
             JsonRoot treeA = JsonRoot.from(rawA);

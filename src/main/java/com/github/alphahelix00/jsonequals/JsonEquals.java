@@ -121,20 +121,28 @@ public class JsonEquals {
         }
         if (!childrenA.isEmpty() && !childrenB.isEmpty()) {
             if (childrenA.objectCount() == childrenB.objectCount() && childrenA.arrayCount() == childrenB.arrayCount() && childrenA.primitiveCount() == childrenB.primitiveCount()) {
-                for (int i = 0; i < childrenA.objectCount(); i++) {
-                    compareNode(childrenA.getChildObjects().get(i), childrenB.getChildObjects().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
-                }
-                for (int i = 0; i < childrenA.arrayCount(); i++) {
-                    compareNode(childrenA.getChildArrays().get(i), childrenB.getChildArrays().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
-                }
-                for (int i = 0; i < childrenA.primitiveCount(); i++) {
-                    if (debugMode) {
-                        LOGGER.debug("Checking array primitive value inside {}", currentPath);
-                    }
-                    if (!childrenA.getChildPrimitives().get(i).equals(childrenB.getChildPrimitives().get(i))) {
-                        inequalityMessages.add(currentPath + " JSON array value expected to be " + childrenA.getChildPrimitives().get(i) + " but got " + childrenB.getChildPrimitives().get(i));
+                for (int i = 0; i < childrenA.size(); i++) {
+
+                    if (childrenA.getType(i) == JsonChildren.Type.OBJECT && childrenB.getType(i) == JsonChildren.Type.OBJECT) {
+                        // Compare child objects
+                        compareNode(childrenA.getObj(i), childrenB.getObj(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+
+                    } else if (childrenA.getType(i) == JsonChildren.Type.ARRAY && childrenB.getType(i) == JsonChildren.Type.ARRAY) {
+                        // Compare child arrays
+                        compareNode(childrenA.getArr(i), childrenB.getArr(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+
+                    } else if (childrenA.getType(i) == JsonChildren.Type.VALUE && childrenB.getType(i) == JsonChildren.Type.VALUE) {
+                        // Compare primitive values
+                        if (debugMode) {
+                            LOGGER.debug("Checking array primitive value inside {}", currentPath);
+                        }
+                        if (!childrenA.get(i).equals(childrenB.get(i))) {
+                            inequalityMessages.add(currentPath + " JSON array value expected to be " + childrenA.get(i) + " but got " + childrenB.get(i));
+                        } else {
+                            successMessages.add(currentPath + "[_] contains: " + childrenA.get(i));
+                        }
                     } else {
-                        successMessages.add(currentPath + "[_] contains: " + childrenA.getChildPrimitives().get(i));
+                        inequalityMessages.add(currentPath + BEGIN_BRACKET + i + END_BRACKET + " types were not the same! Expected " + childrenA.getType(i) + " but got " + childrenB.getType(i));
                     }
                 }
             } else {
@@ -183,16 +191,52 @@ public class JsonEquals {
         }
     }
 
+    private JsonChildren getChildList(LazyArray parent) {
+        JsonChildren jsonChildren = JsonChildren.create();
+        for (int i = 0; i < parent.length(); i++) {
+            switch (parent.getType(i)) {
+                case OBJECT:
+                    jsonChildren.addChildObject(parent.getJSONObject(i));
+                    break;
+                case ARRAY:
+                    jsonChildren.addChildArray(parent.getJSONArray(i));
+                    break;
+                case STRING:
+                    jsonChildren.addChildPrimitive(parent.getString(i));
+                    break;
+                case INTEGER:
+                    jsonChildren.addChildPrimitive(parent.getInt(i));
+                    break;
+                case BOOLEAN:
+                    jsonChildren.addChildPrimitive(parent.getBoolean(i));
+                    break;
+                case FLOAT:
+                    jsonChildren.addChildPrimitive(parent.getDouble(i));
+                    break;
+                default:
+                    jsonChildren.addChildPrimitive(null);
+                    break;
+            }
+        }
+        return jsonChildren;
+    }
+
     private void prune(JsonChildren children, String currentPath, String identifier) {
-        List<LazyObject> childNodes = children.getChildObjects();
+        List<Object> childNodes = children.getChildren();
+        List<JsonChildren.Type> childTypes = children.getChildrenTypes();
+        Iterator<Object> childIterator = childNodes.iterator();
+        Iterator<JsonChildren.Type> childTypesIterator = childTypes.iterator();
         int i = 0;
-        for (Iterator<LazyObject> iterator = childNodes.iterator(); iterator.hasNext(); ) {
-            LazyObject child = iterator.next();
-            if (pathIsPruneField(currentPath + BEGIN_BRACKET + i + END_BRACKET, (LazyObject) child)) {
+        for (; childIterator.hasNext() && childTypesIterator.hasNext(); ) {
+            Object child = childIterator.next();
+            JsonChildren.Type childType = childTypesIterator.next();
+            if (childType == JsonChildren.Type.OBJECT && pathIsPruneField(currentPath + BEGIN_BRACKET + i + END_BRACKET, (LazyObject) child)) {
                 if (debugMode) {
                     LOGGER.debug("Pruning {} {}{}{}{}", identifier, currentPath, BEGIN_BRACKET, i, END_BRACKET);
                 }
-                iterator.remove();
+                childIterator.remove();
+                childTypesIterator.remove();
+                children.pruneOnce();
             }
             i++;
         }
@@ -295,25 +339,25 @@ public class JsonEquals {
         }
         return true;
     }
-
-    private JsonChildren getChildList(LazyArray parent) {
-        List<LazyObject> childObjects = new LinkedList<>();
-        List<LazyArray> childArray = new LinkedList<>();
-        List<Object> childPrimitives = new LinkedList<>();
-        for (int i = 0; i < parent.length(); i++) {
-            if (childIsObject(parent, i)) {
-                childObjects.add(parent.getJSONObject(i));
-            } else if (childIsArray(parent, i)) {
-                childArray.add(parent.getJSONArray(i));
-            } else {
-                childPrimitives.add(getValueAsString(parent, i));
-            }
-        }
-        childObjects.sort(Comparator.comparingInt((node) -> (node.keySet() + node.toString()).hashCode()));
-        childArray.sort(Comparator.comparingInt((node) -> (node.length() + node.toString()).hashCode()));
-        childPrimitives.sort(Comparator.comparingInt(Object::hashCode));
-        return JsonChildren.of(childObjects, childArray, childPrimitives);
-    }
+//
+//    private JsonChildren getChildList(LazyArray parent) {
+//        List<LazyObject> childObjects = new LinkedList<>();
+//        List<LazyArray> childArray = new LinkedList<>();
+//        List<Object> childPrimitives = new LinkedList<>();
+//        for (int i = 0; i < parent.length(); i++) {
+//            if (childIsObject(parent, i)) {
+//                childObjects.add(parent.getJSONObject(i));
+//            } else if (childIsArray(parent, i)) {
+//                childArray.add(parent.getJSONArray(i));
+//            } else {
+//                childPrimitives.add(getValueAsString(parent, i));
+//            }
+//        }
+//        childObjects.sort(Comparator.comparing(node -> (node.keySet().toString() + node.toString())));
+//        childArray.sort(Comparator.comparing(node -> (node.length() + node.toString())));
+//        childPrimitives.sort(Comparator.comparing(Object::toString));
+//        return JsonChildren.of(childObjects, childArray, childPrimitives);
+//    }
 
     private void logInequality(String valueA, String valueB, String currentPath) {
         inequalityMessages.add(currentPath + " values were not the same! Expected " + valueA + " but got " + valueB);

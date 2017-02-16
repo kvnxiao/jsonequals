@@ -3,6 +3,7 @@ package com.github.alphahelix00.jsonequals;
 import me.doubledutch.lazyjson.LazyArray;
 import me.doubledutch.lazyjson.LazyObject;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -10,45 +11,88 @@ import java.util.List;
  */
 public class JsonChildren {
 
-    private final List<LazyArray> childArrays;
-    private final List<LazyObject> childObjects;
-    private final List<Object> childPrimitives;
-
-    private JsonChildren(List<LazyObject> childObjects, List<LazyArray> childArrays, List<Object> childPrimitives) {
-        this.childObjects = childObjects;
-        this.childArrays = childArrays;
-        this.childPrimitives = childPrimitives;
+    public enum Type {
+        OBJECT, ARRAY, VALUE
     }
 
-    public static JsonChildren of(List<LazyObject> childObjects, List<LazyArray> childArrays, List<Object> childPrimitives) {
-        return new JsonChildren(childObjects, childArrays, childPrimitives);
+    private final List<Object> children;
+    private final List<Type> childrenTypes;
+    private int countObjects = 0;
+    private int countArrays = 0;
+    private int countPrimitives = 0;
+
+    private JsonChildren() {
+        this.children = new LinkedList<>();
+        this.childrenTypes = new LinkedList<>();
     }
 
-    public List<LazyObject> getChildObjects() {
-        return childObjects;
-    }
-
-    public List<LazyArray> getChildArrays() {
-        return childArrays;
-    }
-
-    public List<Object> getChildPrimitives() {
-        return childPrimitives;
+    public static JsonChildren create() {
+        return new JsonChildren();
     }
 
     public boolean isEmpty() {
-        return childObjects.isEmpty() && childArrays.isEmpty() && childPrimitives.isEmpty();
+        return children.isEmpty();
+    }
+
+    public int size() {
+        return children.size();
     }
 
     public int objectCount() {
-        return childObjects.size();
+        return countObjects;
     }
 
     public int arrayCount() {
-        return childArrays.size();
+        return countArrays;
     }
 
     public int primitiveCount() {
-        return childPrimitives.size();
+        return countPrimitives;
+    }
+
+    public Type getType(int index) {
+        return childrenTypes.get(index);
+    }
+
+    public Object get(int index) {
+        return children.get(index);
+    }
+
+    public LazyArray getArr(int index) {
+        return (LazyArray) children.get(index);
+    }
+
+    public LazyObject getObj(int index) {
+        return (LazyObject) children.get(index);
+    }
+
+    public void addChildObject(LazyObject obj) {
+        children.add(obj);
+        childrenTypes.add(Type.OBJECT);
+        countObjects++;
+    }
+
+    public void addChildArray(LazyArray arr) {
+        children.add(arr);
+        childrenTypes.add(Type.ARRAY);
+        countArrays++;
+    }
+
+    public void addChildPrimitive(Object obj) {
+        children.add(obj);
+        childrenTypes.add(Type.VALUE);
+        countPrimitives++;
+    }
+
+    public List<Object> getChildren() {
+        return children;
+    }
+
+    public List<Type> getChildrenTypes() {
+        return childrenTypes;
+    }
+
+    public void pruneOnce() {
+        countObjects--;
     }
 }
