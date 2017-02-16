@@ -3,6 +3,8 @@
 JsonEquals is a simple JSON deep-equality comparator for Java.
 It ignores the ordering of JSON keys during comparison, and is perfect for comparing JSON responses between production and staging environments when your project is due for an API upgrade.
 
+One can also selectively define what equality consists of by providing fields to ignore and / or array indices to prune (see usage below).
+
 ## Usage
 
 JsonEquals uses [LazyJSON](https://github.com/doubledutch/LazyJSON), a simple and lightweight Java library to *parse (read)* JSON.
