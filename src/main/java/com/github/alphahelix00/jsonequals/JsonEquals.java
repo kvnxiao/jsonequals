@@ -37,6 +37,14 @@ public class JsonEquals {
         return new JsonEquals(rootType);
     }
 
+    public static JsonEquals between(LazyObject source, LazyObject comparate) {
+        return new JsonEquals(LazyType.OBJECT).withSource(source).withComparate(comparate);
+    }
+
+    public static JsonEquals between(LazyArray source, LazyArray comparate) {
+        return new JsonEquals(LazyType.ARRAY).withSource(source).withComparate(comparate);
+    }
+
     public JsonEquals withSource(LazyElement source) {
         this.source = source;
         return this;
