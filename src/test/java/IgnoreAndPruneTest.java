@@ -1,5 +1,4 @@
 import com.github.alphahelix00.jsonequals.JsonCompareResult;
-import com.github.alphahelix00.jsonequals.JsonEquals;
 import com.github.alphahelix00.jsonequals.JsonTree;
 import org.junit.Test;
 
