@@ -4,5 +4,11 @@
   },
   {
     "field2": "value2"
-  }
+  },
+  "a",
+  "b",
+  "c",
+  true,
+  false,
+  4.2
 ]

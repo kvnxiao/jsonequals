@@ -112,12 +112,16 @@ public class JsonEquals {
             prune(childrenB, currentPath, "comparate");
         }
         if (!childrenA.isEmpty() && !childrenB.isEmpty()) {
-            if (childrenA.nodeCount() == childrenB.nodeCount() && childrenA.primitiveCount() == childrenB.primitiveCount()) {
-                for (int i = 0; i < childrenA.nodeCount(); i++) {
-                    if (childrenA.getChildNodes().get(i).getType() == LazyType.OBJECT) {
-                        compareNode((LazyObject) childrenA.getChildNodes().get(i), (LazyObject) childrenB.getChildNodes().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
-                    } else if (childrenA.getChildNodes().get(i).getType() == LazyType.ARRAY) {
-                        compareNode((LazyArray) childrenA.getChildNodes().get(i), (LazyArray) childrenB.getChildNodes().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+            if (childrenA.objectCount() == childrenB.objectCount() && childrenA.arrayCount() == childrenB.arrayCount() && childrenA.primitiveCount() == childrenB.primitiveCount()) {
+                for (int i = 0; i < childrenA.objectCount(); i++) {
+                    compareNode(childrenA.getChildObjects().get(i), childrenB.getChildObjects().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+                }
+                for (int i = 0; i < childrenA.arrayCount(); i++) {
+                    compareNode(childrenA.getChildArrays().get(i), childrenB.getChildArrays().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
+                }
+                for (int i = 0; i < childrenA.primitiveCount(); i++) {
+                    if (!childrenA.getChildPrimitives().get(i).equals(childrenB.getChildPrimitives().get(i))) {
+                        inequalityMessages.add(currentPath + " JSON array value expected to be " + childrenA.getChildPrimitives().get(i) + " but got " + childrenB.getChildPrimitives().get(i));
                     }
                 }
             } else {
@@ -167,11 +171,11 @@ public class JsonEquals {
     }
 
     private void prune(JsonChildren children, String currentPath, String identifier) {
-        List<LazyElement> childNodes = children.getChildNodes();
+        List<LazyObject> childNodes = children.getChildObjects();
         int i = 0;
-        for (Iterator<LazyElement> iterator = childNodes.iterator(); iterator.hasNext(); ) {
-            LazyElement child = iterator.next();
-            if (child.getType() == LazyType.OBJECT && pathIsPruneField(currentPath + BEGIN_BRACKET + i + END_BRACKET, (LazyObject) child)) {
+        for (Iterator<LazyObject> iterator = childNodes.iterator(); iterator.hasNext(); ) {
+            LazyObject child = iterator.next();
+            if (pathIsPruneField(currentPath + BEGIN_BRACKET + i + END_BRACKET, (LazyObject) child)) {
                 if (debugMode) {
                     LOGGER.debug("Pruning {} {}{}{}{}", identifier, currentPath, BEGIN_BRACKET, i, END_BRACKET);
                 }
@@ -224,6 +228,21 @@ public class JsonEquals {
         }
     }
 
+    private String getValueAsString(LazyArray jsonNode, int i) {
+        switch (jsonNode.getType(i)) {
+            case STRING:
+                return jsonNode.getString(i);
+            case INTEGER:
+                return Integer.toString(jsonNode.getInt(i));
+            case BOOLEAN:
+                return Boolean.toString(jsonNode.getBoolean(i));
+            case FLOAT:
+                return Double.toString(jsonNode.getDouble(i));
+            default:
+                return "null";
+        }
+    }
+
     private boolean pathIsIgnoreField(String currentPath) {
         if (ignoreFields != null && !ignoreFields.isEmpty()) {
             for (String ignoreField : ignoreFields) {
@@ -265,19 +284,22 @@ public class JsonEquals {
     }
 
     private JsonChildren getChildList(LazyArray parent) {
-        List<LazyElement> childNodes = new LinkedList<>();
+        List<LazyObject> childObjects = new LinkedList<>();
+        List<LazyArray> childArray = new LinkedList<>();
         List<Object> childPrimitives = new LinkedList<>();
         for (int i = 0; i < parent.length(); i++) {
             if (childIsObject(parent, i)) {
-                childNodes.add(parent.getJSONObject(i));
+                childObjects.add(parent.getJSONObject(i));
             } else if (childIsArray(parent, i)) {
-                childNodes.add(parent.getJSONArray(i));
+                childArray.add(parent.getJSONArray(i));
             } else {
-                childPrimitives.add(parent.getString(i));
-//                LOGGER.warn("Cannot compare primitive element inside array as it is neither a JSON object or JSON array!");
+                childPrimitives.add(getValueAsString(parent, i));
             }
         }
-        return JsonChildren.of(childNodes, childPrimitives);
+        childObjects.sort(Comparator.comparingInt((node) -> (node.keySet() + node.toString()).hashCode()));
+        childArray.sort(Comparator.comparingInt((node) -> (node.length() + node.toString()).hashCode()));
+        childPrimitives.sort(Comparator.comparingInt(Object::hashCode));
+        return JsonChildren.of(childObjects, childArray, childPrimitives);
     }
 
     private void logInequality(String valueA, String valueB, String currentPath) {

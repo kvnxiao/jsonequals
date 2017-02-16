@@ -1,6 +1,7 @@
 package com.github.alphahelix00.jsonequals;
 
-import me.doubledutch.lazyjson.LazyElement;
+import me.doubledutch.lazyjson.LazyArray;
+import me.doubledutch.lazyjson.LazyObject;
 
 import java.util.List;
 
@@ -9,20 +10,26 @@ import java.util.List;
  */
 public class JsonChildren {
 
-    private final List<LazyElement> childNodes;
+    private final List<LazyArray> childArrays;
+    private final List<LazyObject> childObjects;
     private final List<Object> childPrimitives;
 
-    private JsonChildren(List<LazyElement> childNodes, List<Object> childPrimitives) {
-        this.childNodes = childNodes;
+    private JsonChildren(List<LazyObject> childObjects, List<LazyArray> childArrays, List<Object> childPrimitives) {
+        this.childObjects = childObjects;
+        this.childArrays = childArrays;
         this.childPrimitives = childPrimitives;
     }
 
-    public static JsonChildren of(List<LazyElement> childNodes, List<Object> childPrimitives) {
-        return new JsonChildren(childNodes, childPrimitives);
+    public static JsonChildren of(List<LazyObject> childObjects, List<LazyArray> childArrays, List<Object> childPrimitives) {
+        return new JsonChildren(childObjects, childArrays, childPrimitives);
     }
 
-    public List<LazyElement> getChildNodes() {
-        return childNodes;
+    public List<LazyObject> getChildObjects() {
+        return childObjects;
+    }
+
+    public List<LazyArray> getChildArrays() {
+        return childArrays;
     }
 
     public List<Object> getChildPrimitives() {
@@ -30,11 +37,15 @@ public class JsonChildren {
     }
 
     public boolean isEmpty() {
-        return childNodes.isEmpty() && childPrimitives.isEmpty();
+        return childObjects.isEmpty() && childArrays.isEmpty() && childPrimitives.isEmpty();
     }
 
-    public int nodeCount() {
-        return childNodes.size();
+    public int objectCount() {
+        return childObjects.size();
+    }
+
+    public int arrayCount() {
+        return childArrays.size();
     }
 
     public int primitiveCount() {
