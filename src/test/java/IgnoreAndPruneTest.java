@@ -1,5 +1,5 @@
 import com.github.alphahelix00.jsonequals.JsonCompareResult;
-import com.github.alphahelix00.jsonequals.JsonTree;
+import com.github.alphahelix00.jsonequals.JsonRoot;
 import org.junit.Test;
 
 import java.nio.file.Files;
@@ -24,8 +24,8 @@ public class IgnoreAndPruneTest {
         try {
             String rawA = new String(Files.readAllBytes(Paths.get(GCT_A)));
             String rawB = new String(Files.readAllBytes(Paths.get(GCT_B)));
-            JsonTree treeA = JsonTree.from(rawA);
-            JsonTree treeB = JsonTree.from(rawB);
+            JsonRoot treeA = JsonRoot.from(rawA);
+            JsonRoot treeB = JsonRoot.from(rawB);
 
             List<String> ignoreFields = new ArrayList<>();
             Map<String, String> pruneFields = new HashMap<>();

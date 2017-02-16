@@ -1,6 +1,6 @@
 import com.github.alphahelix00.jsonequals.JsonCompareResult;
 import com.github.alphahelix00.jsonequals.JsonEquals;
-import com.github.alphahelix00.jsonequals.JsonTree;
+import com.github.alphahelix00.jsonequals.JsonRoot;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,20 +39,20 @@ public class ComparisonTest {
 
     @Test
     public void bookTest() {
-        JsonTree rootTree = JsonTree.from(bookTest);
+        JsonRoot rootTree = JsonRoot.from(bookTest);
         assertTrue(rootTree.compareTo(rootTree).isEqual());
     }
 
     @Test
     public void simpleArrayTest() {
-        JsonTree rootTree = JsonTree.from(arrayTest);
+        JsonRoot rootTree = JsonRoot.from(arrayTest);
         assertTrue(rootTree.compareTo(rootTree).isEqual());
     }
 
     @Test
     public void multiArrayTest() {
-        JsonTree rootTreeA = JsonTree.from(multiArrayTest1);
-        JsonTree rootTreeB = JsonTree.from(multiArrayTest2);
+        JsonRoot rootTreeA = JsonRoot.from(multiArrayTest1);
+        JsonRoot rootTreeB = JsonRoot.from(multiArrayTest2);
         JsonCompareResult result = rootTreeA.compareTo(rootTreeB);
         result.getSuccessMessages().forEach(System.out::println);
         result.getInequalityMessages().forEach(System.out::println);
@@ -61,8 +61,8 @@ public class ComparisonTest {
 
     @Test
     public void outOfOrderArrayTest() {
-        JsonTree rootTreeA = JsonTree.from(oooArray1);
-        JsonTree rootTreeB = JsonTree.from(oooArray2);
+        JsonRoot rootTreeA = JsonRoot.from(oooArray1);
+        JsonRoot rootTreeB = JsonRoot.from(oooArray2);
         JsonCompareResult result = rootTreeA.compareTo(rootTreeB);
         assertTrue(result.isEqual());
     }
