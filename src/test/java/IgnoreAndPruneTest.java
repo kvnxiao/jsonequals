@@ -17,25 +17,24 @@ import static org.junit.Assert.assertTrue;
  */
 public class IgnoreAndPruneTest {
 
-    private static final String GCT_A = "tests/ignore_prune_a.json";
-    private static final String GCT_B = "tests/ignore_prune_b.json";
+    private static final String ignoreAndPruneA = "tests/ignore_prune_a.json";
+    private static final String ignoreAndPruneB = "tests/ignore_prune_b.json";
+    private static final String pruneA = "tests/prune_a.json";
+    private static final String pruneb = "tests/prune_b.json";
 
     @Test
-    public void test() {
+    public void pruneTest() {
         try {
             JsonEquals.setDebugMode(true);
-            String rawA = new String(Files.readAllBytes(Paths.get(GCT_A)));
-            String rawB = new String(Files.readAllBytes(Paths.get(GCT_B)));
-            JsonRoot treeA = JsonRoot.from(rawA);
-            JsonRoot treeB = JsonRoot.from(rawB);
+            String rawA = new String(Files.readAllBytes(Paths.get(pruneA)));
+            String rawB = new String(Files.readAllBytes(Paths.get(pruneb)));
 
-            List<String> ignoreFields = new ArrayList<>();
+            JsonRoot jsonA = JsonRoot.from(rawA);
+            JsonRoot jsonB = JsonRoot.from(rawB);
+
             Map<String, String> pruneFields = new HashMap<>();
-
-            ignoreFields.add("$[*].data.last_updated");
-            pruneFields.put("$[*].data.identities[*]:installed", "false");
-
-            JsonCompareResult result = treeA.compareTo(treeB, ignoreFields, pruneFields);
+            pruneFields.put("$.array[*]:id.isValid", "false");
+            JsonCompareResult result = jsonA.compareToWithPrune(jsonB, pruneFields);
             result.getInequalityMessages().forEach(System.out::println);
 
             assertTrue(result.isEqual());
@@ -43,5 +42,31 @@ public class IgnoreAndPruneTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void ignoreAndPruneTest() {
+        try {
+            JsonEquals.setDebugMode(true);
+            String rawA = new String(Files.readAllBytes(Paths.get(ignoreAndPruneA)));
+            String rawB = new String(Files.readAllBytes(Paths.get(ignoreAndPruneB)));
+            JsonRoot jsonA = JsonRoot.from(rawA);
+            JsonRoot jsonB = JsonRoot.from(rawB);
+
+            List<String> ignoreFields = new ArrayList<>();
+            Map<String, String> pruneFields = new HashMap<>();
+
+            ignoreFields.add("$[*].data.last_updated");
+            pruneFields.put("$[*].data.identities[*]:installed", "false");
+
+            JsonCompareResult result = jsonA.compareTo(jsonB, ignoreFields, pruneFields);
+            result.getInequalityMessages().forEach(System.out::println);
+
+            assertTrue(result.isEqual());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 }

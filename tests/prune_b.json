@@ -1,0 +1,68 @@
+{
+  "group": "test1",
+  "array": [
+    {
+      "name": "Name1",
+      "id": {
+        "number": 1,
+        "isValid": true
+      }
+    },
+    {
+      "name": "Name2",
+      "id": {
+        "number": 2,
+        "isValid": true
+      }
+    },
+    {
+      "name": "Name3",
+      "id": {
+        "number": 3,
+        "isValid": false
+      }
+    },
+    {
+      "name": "Name4",
+      "id": {
+        "number": 4,
+        "isValid": true
+      }
+    },
+    {
+      "name": "Name5",
+      "id": {
+        "number": 5,
+        "isValid": true
+      }
+    },
+    {
+      "name": "Name6",
+      "id": {
+        "number": 6,
+        "isValid": false
+      }
+    },
+    {
+      "name": "Name7",
+      "id": {
+        "number": 7,
+        "isValid": false
+      }
+    },
+    {
+      "name": "Name8",
+      "id": {
+        "number": 8,
+        "isValid": false
+      }
+    },
+    {
+      "name": "Name9",
+      "id": {
+        "number": 9,
+        "isValid": true
+      }
+    }
+  ]
+}
