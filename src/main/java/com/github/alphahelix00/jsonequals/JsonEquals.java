@@ -139,7 +139,7 @@ public class JsonEquals {
                         if (!childrenA.get(i).equals(childrenB.get(i))) {
                             inequalityMessages.add(currentPath + " JSON array value expected to be " + childrenA.get(i) + " but got " + childrenB.get(i));
                         } else {
-                            successMessages.add(currentPath + "[_] contains: " + childrenA.get(i));
+                            successMessages.add(currentPath + BEGIN_BRACKET + i + END_BRACKET + "==" + childrenA.get(i));
                         }
                     } else {
                         inequalityMessages.add(currentPath + BEGIN_BRACKET + i + END_BRACKET + " types were not the same! Expected " + childrenA.getType(i) + " but got " + childrenB.getType(i));
