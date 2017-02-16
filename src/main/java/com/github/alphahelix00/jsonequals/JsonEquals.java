@@ -339,25 +339,6 @@ public class JsonEquals {
         }
         return true;
     }
-//
-//    private JsonChildren getChildList(LazyArray parent) {
-//        List<LazyObject> childObjects = new LinkedList<>();
-//        List<LazyArray> childArray = new LinkedList<>();
-//        List<Object> childPrimitives = new LinkedList<>();
-//        for (int i = 0; i < parent.length(); i++) {
-//            if (childIsObject(parent, i)) {
-//                childObjects.add(parent.getJSONObject(i));
-//            } else if (childIsArray(parent, i)) {
-//                childArray.add(parent.getJSONArray(i));
-//            } else {
-//                childPrimitives.add(getValueAsString(parent, i));
-//            }
-//        }
-//        childObjects.sort(Comparator.comparing(node -> (node.keySet().toString() + node.toString())));
-//        childArray.sort(Comparator.comparing(node -> (node.length() + node.toString())));
-//        childPrimitives.sort(Comparator.comparing(Object::toString));
-//        return JsonChildren.of(childObjects, childArray, childPrimitives);
-//    }
 
     private void logInequality(String valueA, String valueB, String currentPath) {
         inequalityMessages.add(currentPath + " values were not the same! Expected " + valueA + " but got " + valueB);
