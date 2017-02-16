@@ -16,7 +16,7 @@ The `JsonRoot#compareTo` method returns a JsonCompareResult, which holds informa
 JsonEquals is capable of *ignoring* fields and *pruning* JSON objects within JSON arrays before comparison.
 For example, responses with different timestamps can be ignored (ignore list), and array objects containing JSON objects with certain field values can be ignored (pruned list with expected value to be filtered out).
 
-#### Ignore Fields
+### Ignoring JSON Fields
 
 Supply a `List<String>` of strings in a dot-notated JSON path format to have JsonEquals ignore these nodes during comparison. Use `JsonRoot#compareToWithIgnore()`
 
@@ -50,11 +50,44 @@ ignoreList.add("$.data.timestamp");
 JsonCompareResult result = jsonRootA.compareToWithIgnore(jsonRootB, ignoreList);
 ```
 
-#### Pruning Objects Inside Arrays
+### Pruning JSON Arrays
 
-Supply a `Map<String, String>` of strings in a dot-notated JSON path format, with the expected output value. Any matches will be _**filtered out (read: removed)**_ and therefore ignored during comparison. Note that this _will_ shift the array indices. Use `JsonRoot#compareToWithPrune()`
+Supply a `Map<String, String>` in a dot-notated JSON path format to expected value in string form to act as a predicate. Any matches will be _**filtered out (read: removed)**_ and therefore ignored during comparison. Note that this _will_ shift the array indices. Use `JsonRoot#compareToWithPrune()`
 
-Example: see [`IgnoreAndPruneTest.java`](https://github.com/alphahelix00/jsonequals/blob/master/src/test/java/IgnoreAndPruneTest.java), along with [`ignore_prune_a.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_a.json) and [`ignore_prune_b.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_b.json)
+Format: `Map<String, String>` -> `("arrayIndexObjectPath:fieldName", "valueToFilterInStringForm")`
+
+e.g.
+```java
+    Map<String, String> pruneMap = new HashMap<>();
+    pruneMap.put("$.someObject.someArray[*]:booleanName", "false"); // * is a wildcard to select all array elements
+    
+    JsonCompareResult result = jsonRootA.compareToWithPrune(jsonRootB, pruneMap);
+    // Or combine both pruning and ignore list
+    JsonCompareResult ignoreAndPruneResult = jsonRootA.compareTo(jsonRootB, ignoreList, pruneMap);
+```
+the JSON string:
+```
+{
+    "someObject": {
+        "someArray": [
+            ... // Objects from index 0 to 5 go here
+            {   // Object with index 6 in someArray
+                "someString": "hello",
+                "booleanName": "false"
+            },
+            {   // Object with index 7 in someArray
+                "someString": "world",
+                "booleanName": "true"
+            }
+            ... // Objects from index 8 and beyond go here
+        ]
+    }
+}
+```
+In the above example, after pruning the JSON file before comparison, the object `$.someObject.someArray[6]` will be removed from comparison, which shifts object `$.someObject.someArray[7]` down to index 6, and so on, until everything that matches has been pruned from the array.
+This can be useful when checking a list of responses from two different environments where there can be gaps in the arrays, for example, if we have an array of applications installed, we can define equality as having the same installed apps from both responses by pruning the apps that are not installed.
+
+For a thorough example, see [`IgnoreAndPruneTest.java`](https://github.com/alphahelix00/jsonequals/blob/master/src/test/java/IgnoreAndPruneTest.java), along with [`ignore_prune_a.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_a.json) and [`ignore_prune_b.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_b.json)
 
 #### Debug Mode
 
