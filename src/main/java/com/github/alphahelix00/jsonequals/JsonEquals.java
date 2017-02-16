@@ -7,10 +7,7 @@ import me.doubledutch.lazyjson.LazyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.github.alphahelix00.jsonequals.Constants.*;
 
@@ -25,7 +22,7 @@ public class JsonEquals {
     private final LazyType rootType;
     private LazyElement source = null;
     private LazyElement comparate = null;
-    private List<String> pruneFields;
+    private Map<String, String> pruneFields;
     private List<String> ignoreFields;
     private List<String> successMessages;
     private List<String> inequalityMessages;
@@ -55,7 +52,7 @@ public class JsonEquals {
         return this;
     }
 
-    public JsonEquals withPruneFields(List<String> pruneFields) {
+    public JsonEquals withPruneFields(Map<String, String> pruneFields) {
         this.pruneFields = pruneFields;
         return this;
     }
@@ -87,7 +84,6 @@ public class JsonEquals {
 
         Set<String> fieldsA = a.keySet();
         Set<String> fieldsB = b.keySet();
-        // TODO: filter fields set for ignoreValues
         if (fieldsA.equals(fieldsB)) {
             for (String fieldName : fieldsA) {
                 if (childIsObject(a, fieldName) && childIsObject(b, fieldName)) {
@@ -111,26 +107,34 @@ public class JsonEquals {
 
         JsonChildren childrenA = getChildList(a);
         JsonChildren childrenB = getChildList(b);
+        if (pruneFields != null && !pruneFields.isEmpty()) {
+            prune(childrenA, currentPath, "source");
+            prune(childrenB, currentPath, "comparate");
+        }
         if (!childrenA.isEmpty() && !childrenB.isEmpty()) {
-            // TODO: prune and filter list of children for ignores
             if (childrenA.nodeCount() == childrenB.nodeCount() && childrenA.primitiveCount() == childrenB.primitiveCount()) {
                 for (int i = 0; i < childrenA.nodeCount(); i++) {
-                    if (childrenA.getChildNodes().get(i) instanceof LazyObject) {
+                    if (childrenA.getChildNodes().get(i).getType() == LazyType.OBJECT) {
                         compareNode((LazyObject) childrenA.getChildNodes().get(i), (LazyObject) childrenB.getChildNodes().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
-                    } else if (childrenA.getChildNodes().get(i) instanceof LazyArray) {
+                    } else if (childrenA.getChildNodes().get(i).getType() == LazyType.ARRAY) {
                         compareNode((LazyArray) childrenA.getChildNodes().get(i), (LazyArray) childrenB.getChildNodes().get(i), currentPath + BEGIN_BRACKET + i + END_BRACKET);
                     }
                 }
             } else {
-                LOGGER.warn("{} JSON array not equal in length!", currentPath);
+                inequalityMessages.add(currentPath + " JSON array not equal in length!");
             }
         }
     }
 
     public void compareValues(LazyObject a, LazyObject b, String fieldName, String currentPath) {
+        if (pathIsIgnoreField(currentPath)) {
+            return;
+        }
+
         if (debugMode) {
             LOGGER.debug("Checking leaf: {}", currentPath);
         }
+
         if (a.getType(fieldName) == LazyType.STRING && b.getType(fieldName) == LazyType.STRING) {
             if (a.getString(fieldName).equals(b.getString(fieldName))) {
                 successMessages.add(currentPath + "==" + a.getString(fieldName));
@@ -159,6 +163,64 @@ public class JsonEquals {
             successMessages.add(currentPath + "==" + a.getString(fieldName));
         } else {
             inequalityMessages.add(currentPath + " were not of the same type! Expected type " + a.getType(fieldName) + " but got type " + b.getType(fieldName));
+        }
+    }
+
+    private void prune(JsonChildren children, String currentPath, String identifier) {
+        List<LazyElement> childNodes = children.getChildNodes();
+        int i = 0;
+        for (Iterator<LazyElement> iterator = childNodes.iterator(); iterator.hasNext(); ) {
+            LazyElement child = iterator.next();
+            if (child.getType() == LazyType.OBJECT && pathIsPruneField(currentPath + BEGIN_BRACKET + i + END_BRACKET, (LazyObject) child)) {
+                if (debugMode) {
+                    LOGGER.debug("Pruning {} {}{}{}{}", identifier, currentPath, BEGIN_BRACKET, i, END_BRACKET);
+                }
+                iterator.remove();
+            }
+            i++;
+        }
+    }
+
+    private boolean pathIsPruneField(String currentPath, LazyObject arrayNode) {
+        for (Map.Entry<String, String> pruneEntry : pruneFields.entrySet()) {
+            String key = pruneEntry.getKey();
+            String value = pruneEntry.getValue();
+
+            String[] fields = key.split(PREDICATE_SEPARATOR);
+            if (fields.length == 0 || fields.length > 2) {
+                // Incorrect formatting
+                return false;
+            }
+            if (pathEquals(currentPath, fields[0])) {
+                LazyObject currentNode = arrayNode;
+                String[] childNodes = fields[1].split(SEPARATOR_REGEX);
+                for (int i = 0; i < childNodes.length - 1; i++) {
+                    if (currentNode != null && currentNode.getType() == LazyType.OBJECT) {
+                        currentNode = currentNode.getJSONObject(childNodes[i]);
+                    } else {
+                        return false;
+                    }
+                }
+                if (currentNode != null) {
+                    return getValueAsString(currentNode, childNodes[childNodes.length - 1]).equals(value);
+                }
+            }
+        }
+        return false;
+    }
+
+    private String getValueAsString(LazyObject jsonNode, String fieldName) {
+        switch (jsonNode.getType(fieldName)) {
+            case STRING:
+                return jsonNode.getString(fieldName);
+            case INTEGER:
+                return Integer.toString(jsonNode.getInt(fieldName));
+            case BOOLEAN:
+                return Boolean.toString(jsonNode.getBoolean(fieldName));
+            case FLOAT:
+                return Double.toString(jsonNode.getDouble(fieldName));
+            default:
+                return "null";
         }
     }
 

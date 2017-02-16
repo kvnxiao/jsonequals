@@ -6,6 +6,7 @@ import me.doubledutch.lazyjson.LazyObject;
 import me.doubledutch.lazyjson.LazyType;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.github.alphahelix00.jsonequals.Constants.BEGIN_BRACKET;
 import static com.github.alphahelix00.jsonequals.Constants.BEGIN_CURLY;
@@ -59,7 +60,7 @@ public class JsonTree {
     // Comparator Methods
     // ------------------
 
-    public JsonCompareResult compareTo(JsonTree other, List<String> ignoreFields, List<String> pruneFields) {
+    public JsonCompareResult compareTo(JsonTree other, List<String> ignoreFields, Map<String, String> pruneFields) {
         if (other != null) {
             if (this.isRootObject() && other.isRootObject()) {
                 // JSON object node
@@ -80,7 +81,7 @@ public class JsonTree {
         return compareTo(other, ignoreFields, null);
     }
 
-    public JsonCompareResult compareToWithPrune(JsonTree other, List<String> pruneFields) {
+    public JsonCompareResult compareToWithPrune(JsonTree other, Map<String, String> pruneFields) {
         return compareTo(other, null, pruneFields);
     }
 
