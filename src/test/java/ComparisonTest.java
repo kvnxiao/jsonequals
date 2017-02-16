@@ -19,8 +19,6 @@ public class ComparisonTest {
     private static String arrayTest;
     private static String multiArrayTest1;
     private static String multiArrayTest2;
-    private static String oooArray1;
-    private static String oooArray2;
 
     @Before
     public void setup() {
@@ -29,8 +27,6 @@ public class ComparisonTest {
             arrayTest = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "array.json")));
             multiArrayTest1 = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multiarray_a.json")));
             multiArrayTest2 = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multiarray_b.json")));
-            oooArray1 = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "outoforder1.json")));
-            oooArray2 = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "outoforder2.json")));
             JsonEquals.setDebugMode(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -59,11 +55,4 @@ public class ComparisonTest {
         assertTrue(result.isEqual());
     }
 
-    @Test
-    public void outOfOrderArrayTest() {
-        JsonRoot rootTreeA = JsonRoot.from(oooArray1);
-        JsonRoot rootTreeB = JsonRoot.from(oooArray2);
-        JsonCompareResult result = rootTreeA.compareTo(rootTreeB);
-        assertTrue(result.isEqual());
-    }
 }
