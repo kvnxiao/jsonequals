@@ -62,7 +62,7 @@ public class ComparisonTest {
     }
 
     @Test
-    public void testMultipleArrayObjects() throws IOException {
+    public void multipleArrayObjectsTest() throws IOException {
         String rawA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multi_array_objects_a.json")));
         String rawB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multi_array_objects_b.json")));
 
