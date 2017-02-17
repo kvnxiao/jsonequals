@@ -74,14 +74,12 @@ public class JsonEquals {
         return JsonCompareResult.of(inequalityMessages.isEmpty(), successMessages, inequalityMessages);
     }
 
-    public boolean compareNode(LazyObject a, LazyObject b) {
+    public void compareNode(LazyObject a, LazyObject b) {
         compareNode(a, b, ROOT_NAME);
-        return false;
     }
 
-    public boolean compareNode(LazyArray a, LazyArray b) {
+    public void compareNode(LazyArray a, LazyArray b) {
         compareNode(a, b, ROOT_NAME);
-        return false;
     }
 
     // Compare objects
@@ -242,7 +240,7 @@ public class JsonEquals {
         }
     }
 
-    private boolean pathIsPruneField(String currentPath, LazyObject arrayNode) {
+    private boolean pathIsPruneField(String currentPath, LazyObject node) {
         for (Map.Entry<String, String> pruneEntry : pruneFields.entrySet()) {
             String key = pruneEntry.getKey();
             String value = pruneEntry.getValue();
@@ -253,7 +251,7 @@ public class JsonEquals {
                 return false;
             }
             if (pathEquals(currentPath, fields[0])) {
-                LazyObject currentNode = arrayNode;
+                LazyObject currentNode = node;
                 String[] childNodes = fields[1].split(SEPARATOR_REGEX);
                 for (int i = 0; i < childNodes.length - 1; i++) {
                     if (currentNode != null && currentNode.getType() == LazyType.OBJECT) {
