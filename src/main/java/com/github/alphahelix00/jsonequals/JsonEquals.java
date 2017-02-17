@@ -132,7 +132,7 @@ public class JsonEquals {
                     } else if (childrenA.getType(i) == JsonChildren.Type.VALUE && childrenB.getType(i) == JsonChildren.Type.VALUE) {
                         // Compare primitive values
                         if (debugMode) {
-                            LOGGER.debug("Checking array primitive value inside {}", currentPath);
+                            LOGGER.debug("Checking array value: {}", currentPath + BEGIN_BRACKET + i + END_BRACKET);
                         }
                         if (!childrenA.get(i).equals(childrenB.get(i))) {
                             inequalityMessages.add(currentPath + " JSON array value expected to be " + childrenA.get(i) + " but got " + childrenB.get(i));
