@@ -1,4 +1,8 @@
-# JsonEquals
+# JsonEquals 
+
+[![Release](https://jitpack.io/v/alphahelix00/jsonequals.svg)]
+(https://jitpack.io/#alphahelix00/jsonequals)
+[![CircleCI](https://circleci.com/gh/alphahelix00/jsonequals.svg?style=svg)](https://circleci.com/gh/alphahelix00/jsonequals)
 
 JsonEquals is a simple JSON deep-equality comparator for Java.
 It ignores the ordering of JSON keys during comparison, and is perfect for comparing JSON responses between production and staging environments when your project is due for an API upgrade.
