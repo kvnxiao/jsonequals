@@ -4,9 +4,11 @@ import com.github.alphahelix00.jsonequals.JsonRoot;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -16,52 +18,58 @@ import static org.junit.Assert.assertTrue;
 public class ComparisonTest {
 
     private static final String TEST_FOLDER = "tests/";
-    private static String bookTestA;
-    private static String bookTestB;
-    private static String arrayTestA;
-    private static String arrayTestB;
-    private static String multiArrayTestA;
-    private static String multiArrayTestB;
 
     @Before
-    public void setup() {
-        try {
-            bookTestA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "book_a.json")));
-            bookTestB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "book_b.json")));
-            arrayTestA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "array_a.json")));
-            arrayTestB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "array_b.json")));
-            multiArrayTestA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multiarray_a.json")));
-            multiArrayTestB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multiarray_b.json")));
-            JsonEquals.setDebugMode(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void enableDebug() {
+        JsonEquals.setDebugMode(true);
     }
 
     @Test
-    public void bookTest() {
+    public void bookTest() throws IOException {
+        String bookTestA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "book_a.json")));
+        String bookTestB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "book_b.json")));
+
         JsonRoot jsonA = JsonRoot.from(bookTestA);
         JsonRoot jsonB = JsonRoot.from(bookTestB);
         JsonCompareResult result = jsonA.compareTo(jsonB);
+
         assertTrue(result.isEqual());
     }
 
     @Test
-    public void simpleNotEqualsArrayTest() {
+    public void simpleNotEqualsArrayTest() throws IOException {
+        String arrayTestA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "array_a.json")));
+        String arrayTestB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "array_b.json")));
+
         JsonRoot jsonA = JsonRoot.from(arrayTestA);
         JsonRoot jsonB = JsonRoot.from(arrayTestB);
         JsonCompareResult result = jsonA.compareTo(jsonB);
-        result.getInequalityMessages().forEach(System.out::println);
+
+        assertEquals(1, result.getInequalityCount());
         assertFalse(result.isEqual());
     }
 
     @Test
-    public void multiArrayTest() {
+    public void multiArrayTest() throws IOException {
+        String multiArrayTestA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multiarray_a.json")));
+        String multiArrayTestB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multiarray_b.json")));
+
         JsonRoot jsonA = JsonRoot.from(multiArrayTestA);
         JsonRoot jsonB = JsonRoot.from(multiArrayTestB);
         JsonCompareResult result = jsonA.compareTo(jsonB);
-        result.getSuccessMessages().forEach(System.out::println);
-        result.getInequalityMessages().forEach(System.out::println);
+
+        assertTrue(result.isEqual());
+    }
+
+    @Test
+    public void testMultipleArrayObjects() throws IOException {
+        String rawA = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multi_array_objects_a.json")));
+        String rawB = new String(Files.readAllBytes(Paths.get(TEST_FOLDER + "multi_array_objects_b.json")));
+
+        JsonRoot jsonA = JsonRoot.from(rawA);
+        JsonRoot jsonB = JsonRoot.from(rawB);
+        JsonCompareResult result = jsonA.compareTo(jsonB);
+
         assertTrue(result.isEqual());
     }
 
