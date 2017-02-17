@@ -32,4 +32,16 @@ public class JsonCompareResult {
     public boolean isEqual() {
         return isEqual;
     }
+
+    public int getSuccessCount() {
+        return successMessages.size();
+    }
+
+    public int getInequalityCount() {
+        return inequalityMessages.size();
+    }
+
+    public int getTotalMessageCount() {
+        return successMessages.size() + inequalityMessages.size();
+    }
 }
