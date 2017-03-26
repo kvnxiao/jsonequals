@@ -3,12 +3,15 @@
 [![CircleCI](https://circleci.com/gh/kvnxiao/jsonequals.svg?style=shield)](https://circleci.com/gh/kvnxiao/jsonequals)
 [![Release](https://jitpack.io/v/kvnxiao/jsonequals.svg)](https://jitpack.io/#kvnxiao/jsonequals)
 
-JsonEquals is a simple JSON deep-equality comparator for Java.
-It ignores the ordering of JSON keys during comparison, and is perfect for comparing JSON responses between production and staging environments when your project is due for an API upgrade.
+A simple, flexible JSON deep-equality comparator with optional settings to ignore and prune specific JSON fields.
 
-One can also selectively define what equality consists of by providing fields to ignore and / or array indices to prune (see usage below).
+## Overview
 
-The current version of JsonEquals is used in production to compare JSON responses between different environments, which helps accelerate the upgrade process for updating API dependencies to newer versions by indicating differences in response data.
+JsonEquals is a simple JSON deep-equality comparator for Java. It parses two JSON inputs and does a thorough comparison between each key, value, and array index, ignoring the ordering of JSON keys during comparison. In addition, one can **selectively define** what **equality** consists of by providing certain fields to **ignore** and certain array indices to **prune** (see examples below).
+
+_Example use cases:_ JsonEquals is perfect for comparing JSON responses between production and staging environments when your project is due for an API upgrade.
+
+The current version of JsonEquals is used in production under the same scenario listed above, to compare JSON responses between different environments, which helps accelerate the upgrade process for updating API dependencies to newer versions by indicating differences in response data.
 
 [Javadocs here](https://kvnxiao.github.io/jsonequals/)
 
