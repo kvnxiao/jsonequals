@@ -8,6 +8,8 @@ It ignores the ordering of JSON keys during comparison, and is perfect for compa
 
 One can also selectively define what equality consists of by providing fields to ignore and / or array indices to prune (see usage below).
 
+[Javadocs here](https://kvnxiao.github.io/jsonequals/)
+
 ## Usage
 
 JsonEquals uses [LazyJSON](https://github.com/doubledutch/LazyJSON), a simple and lightweight Java library to *parse (read)* JSON.
