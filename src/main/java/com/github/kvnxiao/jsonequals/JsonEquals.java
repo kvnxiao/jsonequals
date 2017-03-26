@@ -17,19 +17,6 @@
  */
 package com.github.kvnxiao.jsonequals;
 
-import me.doubledutch.lazyjson.LazyArray;
-import me.doubledutch.lazyjson.LazyElement;
-import me.doubledutch.lazyjson.LazyObject;
-import me.doubledutch.lazyjson.LazyType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import static com.github.kvnxiao.jsonequals.Constants.BEGIN_BRACKET;
 import static com.github.kvnxiao.jsonequals.Constants.END_BRACKET;
 import static com.github.kvnxiao.jsonequals.Constants.NODE_SEPARATOR;
@@ -38,6 +25,19 @@ import static com.github.kvnxiao.jsonequals.Constants.ROOT_NAME;
 import static com.github.kvnxiao.jsonequals.Constants.SEPARATOR_REGEX;
 import static com.github.kvnxiao.jsonequals.Constants.WILDCARD;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import me.doubledutch.lazyjson.LazyArray;
+import me.doubledutch.lazyjson.LazyElement;
+import me.doubledutch.lazyjson.LazyObject;
+import me.doubledutch.lazyjson.LazyType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/** A builder class used to compare two JSON elements. */
 public class JsonEquals {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonEquals.class);
@@ -57,38 +57,89 @@ public class JsonEquals {
     this.inequalityMessages = new ArrayList<>();
   }
 
+  /**
+   * Returns a new JsonEquals builder instance with the specified LazyType, being either for JSON
+   * objects or JSON arrays.
+   *
+   * @param rootType The type of the JSON element, specified as either an object or array
+   * @return A new JsonEquals instance
+   */
   public static JsonEquals ofType(LazyType rootType) {
     return new JsonEquals(rootType);
   }
 
+  /**
+   * Returns a new JsonEquals builder instance between two JSON objects.
+   *
+   * @param source The JSON object source
+   * @param comparate The JSON object to be compared to
+   * @return A new JsonEquals instance with the specified source and comparate JSON objects
+   */
   public static JsonEquals between(LazyObject source, LazyObject comparate) {
     return new JsonEquals(LazyType.OBJECT).withSource(source).withComparate(comparate);
   }
 
+  /**
+   * Returns a new JsonEquals builder instance between two JSON arrays.
+   *
+   * @param source The JSON array source
+   * @param comparate The JSON array to be compared to
+   * @return A new JsonEquals instance with the specified source and comparate JSON arrays
+   */
   public static JsonEquals between(LazyArray source, LazyArray comparate) {
     return new JsonEquals(LazyType.ARRAY).withSource(source).withComparate(comparate);
   }
 
+  /**
+   * Specifies the source JSON element.
+   *
+   * @param source The JSON element source
+   * @return The JsonEquals instance
+   */
   public JsonEquals withSource(LazyElement source) {
     this.source = source;
     return this;
   }
 
+  /**
+   * Specifies the JSON element comparate.
+   *
+   * @param comparate The JSON element to compare to
+   * @return The JsonEquals instance
+   */
   public JsonEquals withComparate(LazyElement comparate) {
     this.comparate = comparate;
     return this;
   }
 
+  /**
+   * Specifies the optional fields to ignore from comparison.
+   *
+   * @param ignoreFields The set of JSON node paths to ignore from comparison
+   * @return The JsonEquals instance
+   */
   public JsonEquals withIgnoreFields(Set<String> ignoreFields) {
     this.ignoreFields = ignoreFields;
     return this;
   }
 
+  /**
+   * Specifies the optional fields to prune before comparison.
+   *
+   * @param pruneFields The predicate map of JSON node paths to expected values that need to be
+   *     pruned before comparison
+   * @return The JsonEquals instance
+   */
   public JsonEquals withPruneFields(Map<String, String> pruneFields) {
     this.pruneFields = pruneFields;
     return this;
   }
 
+  /**
+   * Compares the source with the comparate and returns a JsonCompareResult.
+   *
+   * @return The result of the deep-equal comparison
+   */
   public JsonCompareResult compare() {
     if (rootType == LazyType.OBJECT) {
       compareNode((LazyObject) source, (LazyObject) comparate);
@@ -98,15 +149,33 @@ public class JsonEquals {
     return JsonCompareResult.of(inequalityMessages.isEmpty(), successMessages, inequalityMessages);
   }
 
+  /**
+   * Compares two JSON objects, starting from the root level.
+   *
+   * @param a source JSON object
+   * @param b comparate JSON object
+   */
   public void compareNode(LazyObject a, LazyObject b) {
     compareNode(a, b, ROOT_NAME);
   }
 
+  /**
+   * Compares two JSON arrays, starting from the root level.
+   *
+   * @param a source JSON array
+   * @param b comparate JSON array
+   */
   public void compareNode(LazyArray a, LazyArray b) {
     compareNode(a, b, ROOT_NAME);
   }
 
-  // Compare objects
+  /**
+   * Compares two JSON objects.
+   *
+   * @param a source JSON object
+   * @param b comparate JSON object
+   * @param currentPath The current JSON node path
+   */
   public void compareNode(LazyObject a, LazyObject b, String currentPath) {
     if (pathIsIgnoreField(currentPath)) {
       return;
@@ -136,7 +205,13 @@ public class JsonEquals {
     }
   }
 
-  // Compare arrays
+  /**
+   * Compares two JSON arrays.
+   *
+   * @param a source JSON array
+   * @param b comparate JSON array
+   * @param currentPath The current JSON node path
+   */
   public void compareNode(LazyArray a, LazyArray b, String currentPath) {
     if (pathIsIgnoreField(currentPath)) {
       return;
@@ -151,7 +226,7 @@ public class JsonEquals {
     if (!childrenA.isEmpty() && !childrenB.isEmpty()) {
       if (childrenA.objectCount() == childrenB.objectCount()
           && childrenA.arrayCount() == childrenB.arrayCount()
-          && childrenA.primitiveCount() == childrenB.primitiveCount()) {
+          && childrenA.valueCount() == childrenB.valueCount()) {
         for (int i = 0; i < childrenA.size(); i++) {
 
           if (childrenA.getType(i) == JsonChildren.Type.OBJECT
@@ -211,6 +286,14 @@ public class JsonEquals {
     }
   }
 
+  /**
+   * Compares the values at the end of the JSON hierarchy (i.e. a leaf node)
+   *
+   * @param a the value from the source
+   * @param b the value from the comparate
+   * @param fieldName the name of the JSON field which holds this value
+   * @param currentPath The current JSON node path
+   */
   public void compareValues(LazyObject a, LazyObject b, String fieldName, String currentPath) {
     if (pathIsIgnoreField(currentPath)) {
       return;
@@ -269,19 +352,19 @@ public class JsonEquals {
           jsonChildren.addChildArray(parent.getJSONArray(i));
           break;
         case STRING:
-          jsonChildren.addChildPrimitive(parent.getString(i));
+          jsonChildren.addChildValue(parent.getString(i));
           break;
         case INTEGER:
-          jsonChildren.addChildPrimitive(parent.getInt(i));
+          jsonChildren.addChildValue(parent.getInt(i));
           break;
         case BOOLEAN:
-          jsonChildren.addChildPrimitive(parent.getBoolean(i));
+          jsonChildren.addChildValue(parent.getBoolean(i));
           break;
         case FLOAT:
-          jsonChildren.addChildPrimitive(parent.getDouble(i));
+          jsonChildren.addChildValue(parent.getDouble(i));
           break;
         default:
-          jsonChildren.addChildPrimitive(null);
+          jsonChildren.addChildValue(null);
           break;
       }
     }
@@ -305,7 +388,7 @@ public class JsonEquals {
         }
         childIterator.remove();
         childTypesIterator.remove();
-        children.pruneOnce();
+        children.decrementObjCount();
       }
       i++;
     }
@@ -439,6 +522,12 @@ public class JsonEquals {
     return parent.getType(index) == LazyType.ARRAY;
   }
 
+  /**
+   * Sets the global debug mode for JSON comparisons. If set to true, all comparisons will be logged
+   * to the console using an SLF4J implementation.
+   *
+   * @param debugMode the debug mode boolean value
+   */
   public static void setDebugMode(boolean debugMode) {
     JsonEquals.debugMode = debugMode;
   }

@@ -47,3 +47,10 @@ spotless {
         licenseHeaderFile "${rootProject.projectDir}/docs/license_header"
     }
 }
+
+task outputDocWebsite(type: Copy) {
+    from("${project.buildDir}/docs/javadoc")
+    into("${rootProject.projectDir}/docs/")
+}
+
+javadoc.finalizedBy outputDocWebsite

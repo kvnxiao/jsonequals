@@ -19,6 +19,7 @@ package com.github.kvnxiao.jsonequals;
 
 import java.util.List;
 
+/** A class used to simply hold the result of a comparison between two {@link JsonRoot}s. */
 public class JsonCompareResult {
 
   private final boolean isEqual;
