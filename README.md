@@ -8,6 +8,8 @@ It ignores the ordering of JSON keys during comparison, and is perfect for compa
 
 One can also selectively define what equality consists of by providing fields to ignore and / or array indices to prune (see usage below).
 
+The current version of JsonEquals is used in production to compare JSON responses between different environments, which helps accelerate the upgrade process for updating API dependencies to newer versions by indicating differences in response data.
+
 [Javadocs here](https://kvnxiao.github.io/jsonequals/)
 
 ## Usage
@@ -143,12 +145,7 @@ Replace `@VERSION@` with the version number or commit hash.
 
 ## Contributing
 
-This was but a small project that I was working on. In it's current state, it has sufficiently covered all my needs for JSON comparison.
-However, this doesn't mean that further improvements aren't necessary. 
-
-In fact, all suggestions and improvements are welcome! I would love for others to contribute and make this project better. :)
-
-If you are interested in helping out, please fork a copy of the repository, make your changes, and submit your pull requests!
+Have suggestions? See problems? Got new ideas or improvements? Feel free to submit an issue or pull request!
 
 ## License
 
