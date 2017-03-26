@@ -1,24 +1,49 @@
-group 'com.github.alphahelix00'
-version '1.0.0'
+buildscript {
+    ext.spotless_version = '3.2.0-SNAPSHOT'
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    }
+
+    dependencies {
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:$spotless_version"
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+    }
+}
+
+allprojects {
+    group 'com.github.kvnxiao'
+    version '1.0.1'
+
+    task wrapper(type: Wrapper) {
+        gradleVersion = '3.4.1'
+        distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    }
 }
 
 apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.diffplug.gradle.spotless'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
-    mavenCentral()
     jcenter()
-    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.22'
+    compile 'org.slf4j:slf4j-api:1.7.25'
     compile 'me.doubledutch:lazyjson:1.3.0'
-    testCompile 'ch.qos.logback:logback-classic:1.2.1'
+    testCompile 'ch.qos.logback:logback-classic:1.2.2'
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+spotless {
+    java {
+        googleJavaFormat("1.3")
+        licenseHeaderFile "${rootProject.projectDir}/docs/license_header"
+    }
 }

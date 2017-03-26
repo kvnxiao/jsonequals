@@ -93,7 +93,7 @@ the JSON string:
 In the above example, after pruning the JSON file before comparison, the object `$.someObject.someArray[6]` will be removed from comparison, which shifts object `$.someObject.someArray[7]` down to index 6, and so on, until everything that matches has been pruned from the array.
 This can be useful when checking a list of responses from two different environments where there can be gaps in the arrays, for example, if we have an array of applications installed, we can define equality as having the same installed apps from both responses by pruning the apps that are not installed.
 
-For a thorough example, see [`IgnoreAndPruneTest.java`](https://github.com/alphahelix00/jsonequals/blob/master/src/test/java/IgnoreAndPruneTest.java), along with [`ignore_prune_a.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_a.json) and [`ignore_prune_b.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_b.json)
+For a thorough example, see [`IgnoreAndPruneTest.java`](https://github.com/alphahelix00/jsonequals/blob/master/src/test/java/com/github/alphahelix00/jsonequals/tests/IgnoreAndPruneTest.java), along with [`ignore_prune_a.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_a.json) and [`ignore_prune_b.json`](https://github.com/alphahelix00/jsonequals/blob/master/tests/ignore_prune_b.json)
 
 #### Debug Mode
 
@@ -120,11 +120,7 @@ Replace `@VERSION@` with the version number or commit hash.
 ```
 ```groovy
     dependencies {
-            compile 'com.github.alphahelix00:jsonequals:@VERSION@'
-    }
-```
-
-#### Maven
+            compile kcom.github.kvnxiaoMaven
 ```xml
     ...
     <repositories>
@@ -139,7 +135,7 @@ Replace `@VERSION@` with the version number or commit hash.
     ...
     <dependency>
         <groupId>com.github.alphahelix00</groupId>
-        <artifactId>jsonequals</artifactId>
+     com.github.kvnxiaols</artifactId>
         <version>-SNAPSHOT</version>
     </dependency>
     ...
