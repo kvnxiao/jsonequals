@@ -152,4 +152,4 @@ Have suggestions? See problems? Got new ideas or improvements? Feel free to subm
 
 ## License
 
-This project is licensed under GNU GPLv3
+This project is licensed under Apache 2.0
