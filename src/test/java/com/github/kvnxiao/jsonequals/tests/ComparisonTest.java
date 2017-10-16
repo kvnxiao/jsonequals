@@ -19,12 +19,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.github.kvnxiao.jsonequals.JsonCompareResult;
-import com.github.kvnxiao.jsonequals.JsonEquals;
-import com.github.kvnxiao.jsonequals.JsonRoot;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import com.github.kvnxiao.jsonequals.JsonCompareResult;
+import com.github.kvnxiao.jsonequals.JsonEquals;
+import com.github.kvnxiao.jsonequals.JsonRoot;
+
 import org.junit.Before;
 import org.junit.Test;
 

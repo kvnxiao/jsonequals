@@ -17,9 +17,6 @@ package com.github.kvnxiao.jsonequals.tests;
 
 import static org.junit.Assert.assertTrue;
 
-import com.github.kvnxiao.jsonequals.JsonCompareResult;
-import com.github.kvnxiao.jsonequals.JsonEquals;
-import com.github.kvnxiao.jsonequals.JsonRoot;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,6 +24,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.github.kvnxiao.jsonequals.JsonCompareResult;
+import com.github.kvnxiao.jsonequals.JsonEquals;
+import com.github.kvnxiao.jsonequals.JsonRoot;
+
 import org.junit.Before;
 import org.junit.Test;
 

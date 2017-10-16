@@ -17,6 +17,7 @@ package com.github.kvnxiao.jsonequals;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import me.doubledutch.lazyjson.LazyArray;
 import me.doubledutch.lazyjson.LazyObject;
 

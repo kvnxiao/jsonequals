@@ -20,6 +20,7 @@ import static com.github.kvnxiao.jsonequals.Constants.BEGIN_CURLY;
 
 import java.util.Map;
 import java.util.Set;
+
 import me.doubledutch.lazyjson.LazyArray;
 import me.doubledutch.lazyjson.LazyElement;
 import me.doubledutch.lazyjson.LazyObject;
